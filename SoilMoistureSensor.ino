@@ -191,24 +191,23 @@ void publishMQTT() {
     DynamicJsonBuffer jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
   
-    json["timestamp"] = timeClient.getFormattedTime();
-    json["soil_voltage"] = soil_voltage;
-    json["soil_percent"] = soil_percent;
+    json["ts"] = timeClient.getFormattedTime();
+    json["voltage"] = soil_voltage;
+    json["percent"] = soil_percent;
 
     if (bme_presence) {
-      json["temperature"] = temperature;
-      json["humidity"] = humidity;
-      json["pressure"] = pressure;    
+      json["temp"] = temperature;
+      json["hum"] = humidity;
+      json["press"] = pressure;    
     }
-  
-    json.printTo(Serial);
-    Serial.println();
   
     char msg[512];
     char outMsg[512];
   
     json.printTo(outMsg, sizeof(outMsg));
     snprintf (msg,1000, "%s",outMsg);
+    Serial.println(Settings.mqtt_topic);
+    Serial.println(msg);
     mqttClient.publish(Settings.mqtt_topic, msg);  
   }
 }

@@ -119,6 +119,21 @@ void handleConfigurationForm() {
   response += "<label for=\"wet\">Wet (mV)</label>";
   response += "<input type=\"number\" name=\"wet\" id=\"wet\" value=\"" + String(Settings.wet) + "\" min=\"200\" max=\"300\"/>";
   response += "</fieldset>";
+
+  response += "<fieldset><legend>MQTT</legend>";
+  response += "<label for=\"mqtt_host\">Host</label>";
+  response += "<input type=\"text\" name=\"mqtt_host\" id=\"mqtt_host\" value=\"" + String(Settings.mqtt_host) + "\" maxlength=\"33\"/>";
+  response += "<label for=\"mqtt_port\">Port (1024-49151)</label>";
+  response += "<input type=\"number\" name=\"mqtt_port\" id=\"mqtt_port\" value=\"" + String(Settings.mqtt_port) + "\" min=\"1024\" max=\"49151\"/>";
+  response += "<label for=\"mqtt_client\">Client-ID</label>";
+  response += "<input type=\"text\" name=\"mqtt_client\" id=\"mqtt_client\" value=\"" + String(Settings.mqtt_client) + "\" maxlength=\"33\"/>";
+  response += "<label for=\"mqtt_user\">User</label>";
+  response += "<input type=\"text\" name=\"mqtt_user\" id=\"mqtt_user\" value=\"" + String(Settings.mqtt_user) + "\" maxlength=\"33\"/>";
+  response += "<label for=\"mqtt_pwd\">Password</label>";
+  response += "<input type=\"password\" name=\"mqtt_pwd\" id=\"mqtt_pwd\" maxlength=\"33\"/>";
+  response += "<label for=\"mqtt_topic\">Topic</label>";
+  response += "<input type=\"text\" name=\"mqtt_topic\" id=\"mqtt_topic\" value=\"" + String(Settings.mqtt_topic) + "\" maxlength=\"33\"/>";
+  response += "</fieldset>";
   
   response += "<input type=\"hidden\" name=\"do\" value=\"save\"/>";
   response += "<button>Save configuration </button> ";
@@ -149,6 +164,20 @@ bool handleConfigurationSave() {
   Settings.temp_offset = getFloatArg("temp_offset");
   Settings.dry = getIntegerArg("dry");
   Settings.wet = getIntegerArg("wet");
+
+  
+  getStringArg("mqtt_host", Settings.mqtt_host, 33);
+  Settings.mqtt_port = getIntegerArg("mqtt_port");
+  getStringArg("mqtt_client", Settings.mqtt_client, 33);
+  getStringArg("mqtt_user", Settings.mqtt_user, 33);
+
+  char temp_out[33];
+  getStringArg("mqtt_pwd", temp_out, 33);
+  if (strcmp(temp_out, "") > 0) {
+    strcpy(Settings.mqtt_pwd, temp_out);  
+  }
+  
+  getStringArg("mqtt_topic", Settings.mqtt_topic, 33);
 
   saveSettings();
   handleRestart();

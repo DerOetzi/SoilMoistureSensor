@@ -2,12 +2,18 @@ void initSettings() {
   Settings.restart_flag = 0;
   strcpy(Settings.host, HOSTNAME_DEFAULT);
   Settings.timezone = DEFAULT_TIMEZONE;
-  Settings.mqtt_port = MQTT_PORT;
-  strcpy(Settings.mqtt_topic, MQTT_TOPIC);  
+ 
+  Settings.temp_offset = DEFAULT_TEMP_OFFSET;
   Settings.dry = DRY_INIT;
   Settings.wet = WET_INIT;
-  Settings.temp_offset = DEFAULT_TEMP_OFFSET;
- 
+
+  strcpy(Settings.mqtt_host, "");
+  Settings.mqtt_port = MQTT_PORT;  
+  strcpy(Settings.mqtt_client, "");
+  strcpy(Settings.mqtt_user, "");
+  strcpy(Settings.mqtt_pwd, "");
+  strcpy(Settings.mqtt_topic, MQTT_TOPIC);
+  
   snprintf_P(Settings.my_hostname, sizeof(Settings.my_hostname)-1, HOSTNAME_PATTERN, HOSTNAME_DEFAULT, ESP.getChipId() & 0x1FFF);
 }
 
@@ -30,7 +36,7 @@ bool loadSettings() {
   configFile.readBytes(buf.get(), size);
   configFile.close();
 
-  StaticJsonBuffer<200> jsonBuffer;
+  StaticJsonBuffer<512> jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(buf.get());
 
   if (!json.success()) {
@@ -40,7 +46,7 @@ bool loadSettings() {
 
   strcpy(Settings.host, json["host"]);
   Settings.timezone = json["timezone"];
-  
+
   Settings.temp_offset = json["temp_offset"];
   if (json.containsKey("dry")) {
     Settings.dry = json["dry"];
@@ -49,11 +55,30 @@ bool loadSettings() {
     Settings.wet = json["wet"];
   }
   
+  if (json.containsKey("mqtt_host")) {
+    strcpy(Settings.mqtt_host, json["mqtt_host"]);
+  }
+  if (json.containsKey("mqtt_port")) {
+    Settings.mqtt_port = json["mqtt_port"];
+  }
+  if (json.containsKey("mqtt_client")) {
+    strcpy(Settings.mqtt_client, json["mqtt_client"]);
+  }
+  if (json.containsKey("mqtt_user")) {
+    strcpy(Settings.mqtt_user, json["mqtt_user"]);
+  }
+  if (json.containsKey("mqtt_pwd")) {
+    strcpy(Settings.mqtt_pwd, json["mqtt_pwd"]);
+  }
+  if (json.containsKey("mqtt_topic")) {
+    strcpy(Settings.mqtt_topic, json["mqtt_topic"]);
+  }
+
   return true; 
 }
 
 bool saveSettings() {
-StaticJsonBuffer<200> jsonBuffer;
+StaticJsonBuffer<512> jsonBuffer;
   JsonObject& json = jsonBuffer.createObject();
   json["host"] = Settings.host;
   json["timezone"] = Settings.timezone;
@@ -61,7 +86,13 @@ StaticJsonBuffer<200> jsonBuffer;
   json["temp_offset"] = Settings.temp_offset;
   json["dry"] = Settings.dry;
   json["wet"] = Settings.wet;
-  
+
+  json["mqtt_host"] = Settings.mqtt_host;
+  json["mqtt_port"] = Settings.mqtt_port;
+  json["mqtt_client"] = Settings.mqtt_client;
+  json["mqtt_user"] = Settings.mqtt_user;
+  json["mqtt_pwd"] = Settings.mqtt_pwd;
+  json["mqtt_topic"] = Settings.mqtt_topic;
   
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {

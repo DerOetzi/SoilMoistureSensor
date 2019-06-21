@@ -47,7 +47,7 @@ bool BME280::begin() {
 
   _write8(BME280_REGISTER_CONTROLHUMID, 0x01);
   _write8(BME280_REGISTER_CONFIG, 0xA0);
-  _write8(BME280_REGISTER_CONTROL, 0x25); //0x3F
+  _write8(BME280_REGISTER_CONTROL, 0x27); //0x3F
 
   return true;
 }
@@ -137,7 +137,7 @@ void BME280::_readHumidity(void) {
   
   float temp_exp1 = (float) exp((17.67 * _temperature) / (_temperature + 243.5));
   float temp_exp2 = (float) exp((17.67 * _temperature_adjusted) / (_temperature_adjusted + 243.5));
-  _humidity = (temp_exp1 * (273, 15 + _temperature_adjusted) * _humidity) / (temp_exp2 * (273, 15 + _temperature));
+  _humidity = (temp_exp1 * (273.15 + _temperature_adjusted) * _humidity) / (temp_exp2 * (273.15 + _temperature));
 }
 
 void BME280::_readSensorCalibrationData(void) {

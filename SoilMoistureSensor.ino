@@ -12,14 +12,16 @@
 
 #include <DoubleResetDetector.h>
 
-#include "cactus_io_BME280_I2C.h"
+#include "bme280.h"
 
 #include "settings.h"
 
 #define DRD_TIMEOUT 10
 #define DRD_ADDRESS 0
 #define ANALOG_PIN A0
+#define CONFIG_PORTAL_TIMEOUT_SECONDS 10
 
+bool connected = false;
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 bool mqtt_enabled = false;
@@ -30,7 +32,7 @@ NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
 DoubleResetDetector drd(DRD_TIMEOUT, DRD_ADDRESS);
 
 bool bme_presence = false;
-BME280_I2C bmeSensor(0x76);
+BME280 bmeSensor;
 
 long now;
 
@@ -59,39 +61,37 @@ void setup() {
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(false);
   wifiManager.setAPCallback(configModeCallback);
+  wifiManager.setConfigPortalTimeout(CONFIG_PORTAL_TIMEOUT_SECONDS);
 
   if (drd.detectDoubleReset()) {
     Serial.println("Double Reset Detected");
     wifiManager.startConfigPortal(Settings.my_hostname, AP_PASSWORD);
-  } else if (!wifiManager.autoConnect(Settings.my_hostname, AP_PASSWORD)) {
-    Serial.println("failed to connect and hit timeout");
-    delay(3000);
-    ESP.reset();
-    delay(5000);
+  } else if (wifiManager.autoConnect(Settings.my_hostname, AP_PASSWORD)) {
+    connected = true;
+  } 
+
+  if (connected) {
+    Serial.print("connected...");
+    Serial.println(WiFi.localIP());
+
+    webserver_setup();
+    
+    if(strcmp(Settings.mqtt_host, "") > 0) {
+      mqtt_enabled = true;
+      Serial.println("MQTT activated");
+      mqttClient.setServer(Settings.mqtt_host, Settings.mqtt_port);
+    } 
+  
+    timeClient.begin();
   }
-
-  Serial.println("connected...");
-
-  webserver_setup();
-
-  Serial.print("local ip: ");
-  Serial.println(WiFi.localIP());
 
   if (bmeSensor.begin()) {
     Serial.println("BME280 sensor detected"); 
-    bmeSensor.setTempCal(Settings.temp_offset); 
+    bmeSensor.setTempOffset(Settings.temp_offset); 
     bme_presence = true;
   } else {
     Serial.println("BME280 sensor not detected");  
   }
-
-  if(strcmp(Settings.mqtt_host, "") > 0) {
-    mqtt_enabled = true;
-    Serial.println("MQTT activated");
-    mqttClient.setServer(Settings.mqtt_host, Settings.mqtt_port);
-  } 
-
-  timeClient.begin();
 
   drd.stop();
 }
@@ -131,14 +131,16 @@ void loop() {
     Serial.println("Restart as requested");
     ESP.reset();  
   }
-  
-  timeClient.update();
-  webserver_loop();
+
   now = millis();
-  reconnect();
   readSensor();  
-  
-  publishMQTT();
+
+  if (connected) {
+    timeClient.update();
+    webserver_loop();
+    reconnect();  
+    publishMQTT();
+  }
   
   delay(250);
 }
@@ -161,9 +163,9 @@ void readSensor() {
 
     if (bme_presence) {
       bmeSensor.readSensor();
-      temperature = bmeSensor.getTemperature_C();
+      temperature = bmeSensor.getTemperature();
       humidity = bmeSensor.getHumidity();
-      pressure = bmeSensor.getPressure_MB();
+      pressure = bmeSensor.getPressure();
 
       Serial.print(", Temperature: ");
       Serial.print(temperature);

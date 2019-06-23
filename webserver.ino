@@ -84,7 +84,12 @@ String stateTable() {
   if (bme_presence) {
     response += "<tr><th>Temperature</th><td>" + String(temperature) + " °C</td></tr>";
     response += "<tr><th>Humidity</th><td>" + String(humidity) + " %</td></tr>";
-    response += "<tr><th>Pressure</th><td>" + String(pressure) + " mbar</td></tr>";
+    if (Settings.altitude > 0) {
+      response += "<tr><th>Pressure (" + String(Settings.altitude) + " m)</th><td>" + String(pressure) + " mbar</td></tr>";
+      response += "<tr><th>Pressure (N.N.)</th><td>" + String(pressureSeaLevel) + " mbar</td></tr>";
+    } else {
+      response += "<tr><th>Pressure</th><td>" + String(pressure) + " mbar</td></tr>";
+    }
   }
 
   response += "</tbody></table>";
@@ -113,9 +118,11 @@ void handleConfigurationForm() {
   if (bme_presence) {
     response += "<label for=\"temp_offset\">Temperature Offset (°C)</label>";
     response += "<input type=\"number\" name=\"temp_offset\" id=\"temp_offset\" value=\"" + String(Settings.temp_offset) + "\" min=\"-10\" max=\"10\" step=\"0.5\"/>";
+    response += "<label for=\"altitude\">Altitude (m)</label>";
+    response += "<input type=\"number\" name=\"altitude\" id=\"altitude\" value=\"" + String(Settings.altitude) + "\" min=\"0\" max=\"2000\" step=\"5\"/>";
   }
   response += "<label for=\"dry\">Dry (mV)</label>";
-  response += "<input type=\"number\" name=\"dry\" id=\"dry\" value=\"" + String(Settings.dry) + "\" min=\"550\" max=\"610\"/>";
+  response += "<input type=\"number\" name=\"dry\" id=\"dry\" value=\"" + String(Settings.dry) + "\" min=\"550\" max=\"630\"/>";
   response += "<label for=\"wet\">Wet (mV)</label>";
   response += "<input type=\"number\" name=\"wet\" id=\"wet\" value=\"" + String(Settings.wet) + "\" min=\"200\" max=\"300\"/>";
   response += "</fieldset>";
@@ -162,6 +169,7 @@ bool handleConfigurationSave() {
   Settings.timezone = getIntegerArg("timezone");
   
   Settings.temp_offset = getFloatArg("temp_offset");
+  Settings.altitude = getIntegerArg("altitude");
   Settings.dry = getIntegerArg("dry");
   Settings.wet = getIntegerArg("wet");
 

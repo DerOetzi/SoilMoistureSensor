@@ -8,6 +8,7 @@ BME280::BME280(void) {
 
   _temp_offset  = 0.0;
   _temp_offset_fine = 0.0;
+  _altitude = 0;
   _temperature = 0.0;
   _humidity = 0.0;
   _pressure = 0.0;
@@ -17,6 +18,11 @@ void BME280::setTempOffset(float offset) {
   _temp_offset = offset;
   _temp_offset_fine = ((int32_t) (offset * 100)) << 8;
   _temp_offset_fine = (_temp_offset_fine - 128) / 5;
+  Serial.println(_temp_offset_fine);
+}
+
+void BME280::setAltitude(int altitude) {
+  _altitude = altitude;  
 }
 
 void BME280::readSensor(void) {
@@ -26,7 +32,7 @@ void BME280::readSensor(void) {
 }
 
 float BME280::getTemperature(void) {
-  return _temperature_adjusted;
+  return _temperature;
 }
 
 float BME280::getHumidity(void) {
@@ -35,6 +41,11 @@ float BME280::getHumidity(void) {
 
 float BME280::getPressure(void) {
   return _pressure;
+}
+
+float BME280::getPressureSeaLevel(void) {
+  float temp_kelvin = _temperature + 273.15;
+  return _pressure * (pow(temp_kelvin/(temp_kelvin+0.0065 * _altitude), -5.255));  
 }
 
 bool BME280::begin() {
@@ -66,11 +77,9 @@ void BME280::_readTemperature(void) {
              ((adc_T >> 4) - ((int32_t)_cal_data.dig_T1))) >> 12) *
            ((int32_t)_cal_data.dig_T3)) >> 14;
 
-  _t_fine = var1 + var2;
+  _t_fine = var1 + var2 + _temp_offset_fine;
   _temperature  = (_t_fine * 5 + 128) >> 8;
   _temperature = _temperature / 100;
-
-  _temperature_adjusted = _temperature + _temp_offset;
 }
 
 
@@ -134,10 +143,6 @@ void BME280::_readHumidity(void) {
   float h = (v_x1_u32r >> 12);
 
   _humidity = h / 1024.0;
-  
-  float temp_exp1 = (float) exp((17.67 * _temperature) / (_temperature + 243.5));
-  float temp_exp2 = (float) exp((17.67 * _temperature_adjusted) / (_temperature_adjusted + 243.5));
-  _humidity = (temp_exp1 * (273.15 + _temperature_adjusted) * _humidity) / (temp_exp2 * (273.15 + _temperature));
 }
 
 void BME280::_readSensorCalibrationData(void) {

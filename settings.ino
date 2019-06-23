@@ -2,6 +2,7 @@ void initSettings() {
   Settings.restart_flag = 0;
   strcpy(Settings.host, HOSTNAME_DEFAULT);
   Settings.timezone = DEFAULT_TIMEZONE;
+  Settings.altitude = DEFAULT_ALTITUDE;
  
   Settings.temp_offset = DEFAULT_TEMP_OFFSET;
   Settings.dry = DRY_INIT;
@@ -48,6 +49,9 @@ bool loadSettings() {
   Settings.timezone = json["timezone"];
 
   Settings.temp_offset = json["temp_offset"];
+  if (json.containsKey("altitude")) {
+    Settings.altitude = json["altitude"];
+  }
   if (json.containsKey("dry")) {
     Settings.dry = json["dry"];
   }
@@ -84,6 +88,7 @@ StaticJsonBuffer<512> jsonBuffer;
   json["timezone"] = Settings.timezone;
   
   json["temp_offset"] = Settings.temp_offset;
+  json["altitude"] = Settings.altitude;
   json["dry"] = Settings.dry;
   json["wet"] = Settings.wet;
 

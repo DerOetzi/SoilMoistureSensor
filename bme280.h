@@ -71,12 +71,14 @@ public:
   bool begin(void);
   
   void setTempOffset(float);
+  void setAltitude(int);
 
   void readSensor(void);
 
   float getTemperature(void);
   float getHumidity(void);
   float getPressure(void);
+  float getPressureSeaLevel(void);
     
 private:
   BME280_Calibration_Data _cal_data;
@@ -88,6 +90,7 @@ private:
   
   float    _temp_offset;
   int32_t  _temp_offset_fine;
+  int32_t  _altitude;
   float    _temperature;
   float    _temperature_adjusted;
   float    _humidity;

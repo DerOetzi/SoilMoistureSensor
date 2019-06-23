@@ -88,6 +88,7 @@ void setup() {
   if (bmeSensor.begin()) {
     Serial.println("BME280 sensor detected"); 
     bmeSensor.setTempOffset(Settings.temp_offset); 
+    bmeSensor.setAltitude(Settings.altitude);
     bme_presence = true;
   } else {
     Serial.println("BME280 sensor not detected");  
@@ -121,10 +122,11 @@ void reconnect() {
 }
 
 int soil_voltage(NAN);
-float soil_percent(NAN);
+int soil_percent(NAN);
 float temperature(NAN);
-float humidity(NAN);
+int humidity(NAN);
 float pressure(NAN);
+float pressureSeaLevel(NAN);
 
 void loop() {
   if (Settings.restart_flag == 1) {
@@ -156,6 +158,7 @@ void readSensor() {
     Serial.print(" mV");
 
     soil_percent = ((Settings.dry - soil_voltage) * 100) / (Settings.dry - Settings.wet);
+    soil_percent = round(soil_percent);
   
     Serial.print(", Soil Percent: ");
     Serial.print(soil_percent);
@@ -163,16 +166,21 @@ void readSensor() {
 
     if (bme_presence) {
       bmeSensor.readSensor();
-      temperature = bmeSensor.getTemperature();
-      humidity = bmeSensor.getHumidity();
-      pressure = bmeSensor.getPressure();
-
+      temperature = round(bmeSensor.getTemperature() * 10) / 10;
+      humidity = round(bmeSensor.getHumidity());
+      pressure = round(bmeSensor.getPressure() * 10) / 10;
+      
       Serial.print(", Temperature: ");
       Serial.print(temperature);
       Serial.print(" °C, Humidity: ");
       Serial.print(humidity);
       Serial.print(" %, Pressure: ");
       Serial.print(pressure);
+      if (Settings.altitude > 0) {
+        pressureSeaLevel = round(bmeSensor.getPressureSeaLevel() * 10) / 10;
+        Serial.print(" mbar, Pressure N.N.: ");
+        Serial.print(pressureSeaLevel);
+      }
       Serial.print(" mbar");
     }
 
@@ -192,13 +200,16 @@ void publishMQTT() {
     JsonObject& json = jsonBuffer.createObject();
   
     json["ts"] = timeClient.getFormattedTime();
-    json["voltage"] = soil_voltage;
-    json["percent"] = soil_percent;
+    json["v"] = soil_voltage;
+    json["s"] = soil_percent;
 
     if (bme_presence) {
-      json["temp"] = temperature;
-      json["hum"] = humidity;
-      json["press"] = pressure;    
+      json["t"] = temperature;
+      json["h"] = humidity;
+      json["p"] = pressure; 
+      if (Settings.altitude > 0) {
+        json["pNN"] = pressureSeaLevel;  
+      }   
     }
   
     char msg[512];

@@ -1,4 +1,4 @@
-#include "bme280.h"
+#include "BME280.h"
 
 #include <math.h>
 #include <Wire.h>

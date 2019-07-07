@@ -1,6 +1,6 @@
-#ifndef __BME280_H__
+#ifndef BME280_H
 
-#define __BME280_H__
+#define BME280_H
 
 #include "Arduino.h"
 

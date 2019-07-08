@@ -5,15 +5,19 @@
 
 Sensors sensors;
 
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     Serial.println();
-    
-    SettingsManager::load();
+
+    SettingsManager::instance().load();
 
     sensors.begin();
 }
 
-void loop() {
+void loop()
+{
     sensors.read();
+
+    delay(250);
 }

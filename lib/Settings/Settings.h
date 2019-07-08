@@ -3,18 +3,25 @@
 
 #include <stdint.h>
 
+#define TRACE 0
+#define DEBUG 1
+#define INFO 2
+#define WARN 3
+#define ERROR 4
+
 #define HOSTNAME_PATTERN "%s-%04d"
 #define HOSTNAME_DEFAULT "SoilMoistureSensor"
 #define AP_PASSWORD "soilmoisture"
 #define DRY_INIT 630
 #define WET_INIT 270
 #define DEFAULT_TIMEZONE 0
-#define DEFAULT_TEMP_OFFSET -5
+#define DEFAULT_TEMP_OFFSET -5.0
 #define DEFAULT_ALTITUDE 0
 #define MQTT_PORT 1883
 #define MQTT_TOPIC "sensor/soilmoisture"
+#define DEFAULT_LOGLEVEL DEBUG
 
-struct SYSCFG
+struct Settings
 {
 public:
   char host[40];
@@ -31,6 +38,7 @@ public:
   float temp_offset;
   uint16_t dry;
   uint16_t wet;
-} Settings;
+  int8_t loglevel;
+};
 
 #endif

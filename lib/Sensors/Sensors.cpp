@@ -1,5 +1,6 @@
 #include "Sensors.h"
-#include <Settings.h>
+#include <SettingsManager.h>
+#include <string>
 
 Sensors::Sensors() {}
 
@@ -9,8 +10,8 @@ bool Sensors::begin()
     {
         Serial.println("BME280 sensor detected");
         _bme_presence = true;
-        _bme_sensor.setTempOffset(Settings.temp_offset);
-        _bme_sensor.setAltitude(Settings.altitude);
+        _bme_sensor.setTempOffset(SettingsManager::get().temp_offset);
+        _bme_sensor.setAltitude(SettingsManager::get().altitude);
     }
     else
     {
@@ -26,7 +27,10 @@ void Sensors::read()
     {
         _data.timestamp = millis();
         _data.soil_voltage = analogRead(PIN_A0);
-        _data.soil_percent = round(((Settings.dry - _data.soil_voltage) * 100) / (Settings.dry - Settings.wet));
+
+        int dry = SettingsManager::get().dry;
+        int wet = SettingsManager::get().wet;
+        _data.soil_percent = round(((dry - _data.soil_voltage) * 100) / (dry - wet));
 
         if (_bme_presence)
         {
@@ -35,20 +39,45 @@ void Sensors::read()
             _data.temperature = round(_bme_sensor.getTemperature() * 10) / 10;
             _data.humidity = round(_bme_sensor.getHumidity());
             _data.pressure = round(_bme_sensor.getPressure() * 10) / 10;
-            if (Settings.altitude > 0)
+
+            int altitude = SettingsManager::get().altitude;
+            if (altitude > 0)
             {
-                _data.altitude = Settings.altitude;
+                _data.altitude = altitude;
                 _data.pressureSeaLevel = round(_bme_sensor.getPressureSeaLevel() * 10) / 10;
             }
+        }
+
+        if (SettingsManager::get().loglevel <= DEBUG)
+        {
+            serialprint();
         }
     }
 }
 
-SensorsData Sensors::data()
-{
-    return _data;
-}
-
 void Sensors::serialprint()
 {
+    String output = "Soil Moisture Voltage: ";
+    output += _data.soil_voltage;
+    output += " mV, Soil Moisture Percent: ";
+    output += _data.soil_percent;
+    output += " %";
+
+    if (_bme_presence)
+    {
+        output += ", Temperature: ";
+        output += _data.temperature;
+        output += " °C, Humidity:";
+        output += _data.humidity;
+        output += " %, Pressure: ";
+        output += _data.pressure;
+        if (SettingsManager::get().altitude > 0)
+        {
+            output += " mbar, Pressure Sealevel: ";
+            output += _data.pressureSeaLevel;
+        }
+        output += " mbar";
+    }
+
+    Serial.println(output);
 }

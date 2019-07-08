@@ -1,3 +1,4 @@
+#include <FS.h>
 #include <Arduino.h>
 
 #include <SettingsManager.h>
@@ -9,6 +10,8 @@ void setup()
 {
     Serial.begin(115200);
     Serial.println();
+
+    SPIFFS.begin();
 
     SettingsManager::instance().load();
 

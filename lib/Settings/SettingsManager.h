@@ -2,6 +2,21 @@
 #define SETTINGSMANAGER_H
 
 #include <Settings.h>
+#include <ArduinoJson.h>
+
+#define FILE_HOST "h"
+#define FILE_TIMEZONE "tz"
+#define FILE_TEMP_OFFSET "to"
+#define FILE_LOGLEVEL "ll"
+#define FILE_ALTITUDE "a"
+#define FILE_DRY "d"
+#define FILE_WET "w"
+#define FILE_MQTT_HOST "mh"
+#define FILE_MQTT_PORT "mp"
+#define FILE_MQTT_CLIENT "mc"
+#define FILE_MQTT_USER "mu"
+#define FILE_MQTT_PWD "mpw"
+#define FILE_MQTT_TOPIC "mt"
 
 class SettingsManager
 {
@@ -42,6 +57,10 @@ private:
     SettingsManager(){};
     SettingsManager(const SettingsManager &);
     SettingsManager &operator=(const SettingsManager &);
+
+    void intValue(StaticJsonDocument<512> json, const char *key, int *out);
+    void floatValue(StaticJsonDocument<512> json, const char *key, float *out);
+    void charValue(StaticJsonDocument<512> json, const char *key, char *out);
 };
 
 #endif

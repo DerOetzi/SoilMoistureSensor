@@ -30,5 +30,7 @@ void loop()
     sensors.read();
     wifi.loop();
 
+    web.loop();
+
     delay(250);
 }

@@ -22,7 +22,7 @@ void setup()
 
     wifi.begin(SettingsManager::get().my_hostname, AP_PASSWORD);
 
-    web.begin(SettingsManager::get().host);
+    web.begin();
 }
 
 void loop()

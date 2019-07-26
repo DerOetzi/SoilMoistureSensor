@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>%title% - %hostname%</title>
+    <title>%hostname%</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
 
@@ -11,7 +11,15 @@
 </head>
 
 <body>
-    <h1>%hostname%</h1>
+    <h1>Soil Moisture Sensor</h1>
+    <h2>%hostname%</h2>
+    <div id="states"></div>
+    <form method="GET" action="/config">
+        <button>Configuration</button>
+    </form>
+    <form method="GET" action="/reset" onsubmit="return confirm('Confirm restart?');">
+        <button class="red">Restart</button>
+    </form>
 </body>
 
 </html>

@@ -2,23 +2,19 @@
 #define WEBSERVER_H
 
 #include "Sensors.h"
-#include <ESP8266WebServer.h>
+#include "ESPAsyncWebServer.h"
 
 class Webserver
 {
 public:
     Webserver(void);
-    bool begin(const char *hostname);
+    bool begin();
     void loop();
 
+    String indexProcessor(const String &key);
+
 private:
-    char _hostname[40];
-    std::unique_ptr<ESP8266WebServer> server;
-
-    void handleRoot();
-
-    void handleServeStatic(void);
-    String getContentType(String filename);
+    AsyncWebServer webserver;
 };
 
 #endif

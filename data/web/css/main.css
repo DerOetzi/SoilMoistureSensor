@@ -13,9 +13,27 @@ body{
     font-family:verdana,sans-serif;
 }
 
-div{
+div {
     margin:10px 0; 
     padding:0;
+}
+
+#states table {
+    width:100%;
+}
+
+#states table th {
+    text-align:left;
+}
+
+#states table td {
+    text-align:right;
+}
+
+#states table.nobme280 .bme280,
+#states .psl0,
+fieldset div.nobme280  {
+    display:none;
 }
 
 form{
@@ -33,10 +51,6 @@ h2{
     font-size:1.5em;
     font-weight:bold;
     text-align:center;
-}
-  
-table{
-    text-align:left;
 }
 
 form{

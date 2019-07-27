@@ -9,12 +9,18 @@ class Webserver
 public:
     Webserver(void);
     bool begin();
-    void loop();
-
-    String indexProcessor(const String &key);
+    void loop(SensorsData &data);
 
 private:
     AsyncWebServer webserver;
+    SensorsData _data;
+
+    void handleRoot(AsyncWebServerRequest *request);
+    String processorRoot(const String &key);
+    void stateJson(AsyncWebServerRequest *request);
+
+    void handleConfiguration(AsyncWebServerRequest *request);
+    String processorConfiguration(const String &key);
 };
 
 #endif

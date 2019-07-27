@@ -5,21 +5,49 @@
     <title>%hostname%</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <script src="/js/main.js"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no" />
 
 </head>
 
-<body>
-    <h1>Soil Moisture Sensor</h1>
-    <h2>%hostname%</h2>
-    <div id="states"></div>
-    <form method="GET" action="/config">
-        <button>Configuration</button>
-    </form>
-    <form method="GET" action="/reset" onsubmit="return confirm('Confirm restart?');">
-        <button class="red">Restart</button>
-    </form>
+<body onload="statesUpdate();window.setInterval(statesUpdate, 2345);">
+    <div id="container">
+        <h1>Soil Moisture Sensor</h1>
+        <h2>%hostname%</h2>
+        <div id="states">
+            <table class="%bme_presence%">
+                <tbody>
+                    <tr id="tr_sp">
+                        <th>Soil Moisture</th>
+                        <td><span id="sp">-</span> &#37;</td>
+                    </tr>
+                    <tr class="bme280">
+                        <th>Temperature</th>
+                        <td><span id="t">-</span> &#176;C</td>
+                    </tr>
+                    <tr class="bme280">
+                        <th>Humidity</th>
+                        <td><span id="h">-</span> &#37;</td>
+                    </tr>
+                    <tr class="bme280">
+                        <th>Pressure</th>
+                        <td><span id="p">-</span> mbar</td>
+                    </tr>
+                    <tr class="psl%altitude% bme280">
+                        <th>Pressure (N.N.)</th>
+                        <td><span id="psl">-</span> mbar</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <form method="GET" action="/config">
+            <button>Configuration</button>
+        </form>
+        <form method="GET" action="/reset" onsubmit="return confirm('Confirm restart?');">
+            <button class="red">Restart</button>
+        </form>
+    </div>
 </body>
 
 </html>
